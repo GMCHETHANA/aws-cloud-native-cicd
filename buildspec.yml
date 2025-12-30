@@ -1,0 +1,19 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR
+      - aws --version
+      - $(aws ecr get-login-password --region eu-north-1 | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.eu-north-1.amazonaws.com)
+
+  build:
+    commands:
+      - echo Building Docker image
+      - docker build -t cloud-native-app .
+      - docker tag cloud-native-app:latest $AWS_ACCOUNT_ID.dkr.ecr.eu-north-1.amazonaws.com/cloud-native-app:latest
+
+  post_build:
+    commands:
+      - echo Pushing Docker image
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.eu-north-1.amazonaws.com/cloud-native-app:latest
